@@ -1,0 +1,37 @@
+{
+    "name": "personalize_delete_model",
+    "notebook_task": {
+        "notebook_path": "personalize_models/delete_dataset_group"
+    },
+    "email_notifications": {
+        "on_failure": "PLACEHOLDER",
+        "no_alert_for_skipped_runs": false
+      },
+    "timeout_seconds": 18000,
+    "max_concurrent_runs": 10,
+    "new_cluster": {
+        "num_workers": 0,
+        "spark_version": "16.4.x-scala2.13",
+        "spark_conf": {
+            "spark.master": "local[*]"
+        },
+        "aws_attributes": {
+            "first_on_demand": 1,
+            "availability": "SPOT_WITH_FALLBACK",
+            "instance_profile_arn": "PLACEHOLDER",
+            "spot_bid_price_percent": 50,
+            "ebs_volume_count": 0
+        },
+        "node_type_id": "m5d.large",
+        "policy_id": "PLACEHOLDER",
+        "data_security_mode": "SINGLE_USER",
+        "cluster_log_conf": {
+            "s3": {
+                "destination": "PLACEHOLDER",
+                "region": "eu-west-1",
+                "enable_encryption": true,
+                "canned_acl": "bucket-owner-full-control"
+            }
+        }
+    }
+}

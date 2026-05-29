@@ -1,0 +1,232 @@
+{
+    "name": "product_similarity_job",
+    "email_notifications": {
+        "on_failure": "PLACEHOLDER"
+    },
+    "notification_settings": {
+        "no_alert_for_skipped_runs": false
+    },
+    "schedule": {
+        "quartz_cron_expression": "0 0 6 * * ?",
+        "timezone_id": "UTC",
+        "pause_status": "PAUSED"
+    },
+    "timeout_seconds": 36000,
+    "max_concurrent_runs": 1,
+    "format": "MULTI_TASK",
+    "tasks": [
+        {
+            "task_key": "refresh_embeddings",
+            "notebook_task": {
+                "notebook_path": "similarity/drop_embeddings",
+                "source": "WORKSPACE"
+            },
+            "job_cluster_key": "large_multi_cluster"
+        },
+        {
+            "task_key": "anzs_embeddings",
+            "depends_on": [
+                {
+                    "task_key": "refresh_embeddings"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "similarity/product_embeddings",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "recs_region": "anzs"
+                }
+            },
+            "job_cluster_key": "large_multi_cluster"
+        },
+        {
+            "task_key": "ca_embeddings",
+            "depends_on": [
+                {
+                    "task_key": "refresh_embeddings"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "similarity/product_embeddings",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "recs_region": "ca"
+                }
+            },
+            "job_cluster_key": "large_multi_cluster"
+        },
+        {
+            "task_key": "in_embeddings",
+            "depends_on": [
+                {
+                    "task_key": "anzs_embeddings"
+                },
+                { 
+                    "task_key": "ca_embeddings" 
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "similarity/product_embeddings",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "recs_region": "in"
+                }
+            },
+            "job_cluster_key": "large_multi_cluster"
+        },
+        {
+            "task_key": "us_embeddings",
+            "depends_on": [
+                {
+                    "task_key": "anzs_embeddings"
+                },
+                { 
+                    "task_key": "ca_embeddings" 
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "similarity/product_embeddings",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "recs_region": "us"
+                }
+            },
+            "job_cluster_key": "large_multi_cluster"
+        },
+        {
+            "task_key": "dach_embeddings",
+            "depends_on": [
+                {
+                    "task_key": "in_embeddings"
+                },
+                { 
+                    "task_key": "us_embeddings" 
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "similarity/product_embeddings",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "recs_region": "dach"
+                }
+            },
+            "job_cluster_key": "large_multi_cluster"
+        },
+        {
+            "task_key": "eu_embeddings",
+            "depends_on": [
+                {
+                    "task_key": "in_embeddings"
+                },
+                { 
+                    "task_key": "us_embeddings" 
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "similarity/product_embeddings",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "recs_region": "eu"
+                }
+            },
+            "job_cluster_key": "large_multi_cluster"
+        },
+        {
+            "task_key": "frcen_embeddings",
+            "depends_on": [
+                {
+                    "task_key": "dach_embeddings"
+                },
+                { 
+                    "task_key": "eu_embeddings" 
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "similarity/product_embeddings",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "recs_region": "frcen"
+                }
+            },
+            "job_cluster_key": "large_multi_cluster"
+        },
+        {
+            "task_key": "uk_embeddings",
+            "depends_on": [
+                {
+                    "task_key": "dach_embeddings"
+                },
+                { 
+                    "task_key": "eu_embeddings" 
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "similarity/product_embeddings",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "recs_region": "uk"
+                }
+            },
+            "job_cluster_key": "large_multi_cluster"
+        },
+        {
+            "task_key": "product_similarity",
+            "depends_on": [
+                {
+                    "task_key": "frcen_embeddings"
+                },
+                { 
+                    "task_key": "uk_embeddings" 
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "similarity/product_similarity",
+                "source": "WORKSPACE"
+            },
+            "job_cluster_key": "large_multi_cluster"
+        },
+        {
+            "task_key": "item_configs_to_dynamo",
+            "depends_on": [
+                {
+                    "task_key": "product_similarity"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "similarity/item_configs_to_dynamo",
+                "source": "WORKSPACE"
+            },
+            "job_cluster_key": "large_multi_cluster"
+        }
+    ],
+    "job_clusters": [
+        {
+            "job_cluster_key": "large_multi_cluster",
+            "new_cluster": {
+                "spark_version": "15.4.x-scala2.12",
+                "spark_conf": {
+                    "spark.driver.memory": "55g",
+                    "spark.driver.memoryOverhead": "55g",
+                    "spark.executor.memory": "70g",
+                    "spark.executor.memoryOverhead": "40g",
+                    "spark.sql.shuffle.partitions": "480"
+                },
+                "aws_attributes": {
+                    "first_on_demand": 1,
+                    "availability": "SPOT_WITH_FALLBACK",
+                    "instance_profile_arn": "PLACEHOLDER",
+                    "spot_bid_price_percent": 50,
+                    "ebs_volume_count": 0
+                },
+                "num_workers": 6,
+                "node_type_id": "i3.4xlarge",
+                "driver_node_type_id": "i3.4xlarge",
+                "custom_tags": {
+                    "Product": "PLACEHOLDER"
+                },
+                "policy_id": "PLACEHOLDER",
+                "data_security_mode": "SINGLE_USER"
+            }
+        }
+    ]
+}

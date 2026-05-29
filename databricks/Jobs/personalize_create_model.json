@@ -1,0 +1,441 @@
+{
+    "name": "personalize_create_model",
+    "email_notifications": {
+        "on_failure": "PLACEHOLDER",
+        "no_alert_for_skipped_runs": false
+    },
+    "timeout_seconds": 172800,
+    "max_concurrent_runs": 10,
+    "format": "MULTI_TASK",
+    "tasks": [
+        {
+            "task_key": "create_dataset_group",
+            "notebook_task": {
+                "notebook_path": "personalize_models/1_create_dataset_group",
+                "source": "WORKSPACE"
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "create_dataset_items",
+            "depends_on": [
+                {
+                    "task_key": "create_dataset_group"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/2_create_dataset",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "dataset_type": "items"
+                }
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "create_dataset_users",
+            "depends_on": [
+                {
+                    "task_key": "create_dataset_group"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/2_create_dataset",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "dataset_type": "users"
+                }
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "create_dataset_interactions",
+            "depends_on": [
+                {
+                    "task_key": "create_dataset_group"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/2_create_dataset",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "dataset_type": "interactions"
+                }
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "import_data_items",
+            "depends_on": [
+                {
+                    "task_key": "create_dataset_items"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/3_import_data",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "dataset_type": "items"
+                }
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "import_data_users",
+            "depends_on": [
+                {
+                    "task_key": "create_dataset_users"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/3_import_data",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "dataset_type": "users"
+                }
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "import_data_interactions",
+            "depends_on": [
+                {
+                    "task_key": "create_dataset_interactions"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/3_import_data",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "dataset_type": "interactions"
+                }
+            },
+            "job_cluster_key": "large_cluster"
+        },
+        {
+            "task_key": "create_event_tracker",
+            "depends_on": [
+                {
+                    "task_key": "import_data_items"
+                },
+                {
+                    "task_key": "import_data_users"
+                },
+                {
+                    "task_key": "import_data_interactions"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/4_create_event_tracker",
+                "source": "WORKSPACE"
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "create_solution_popular",
+            "depends_on": [
+                {
+                    "task_key": "create_event_tracker"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/5_create_solution",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "solution": "popular"
+                }
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "create_solution_sims",
+            "depends_on": [
+                {
+                    "task_key": "create_event_tracker"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/5_create_solution",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "solution": "sims"
+                }
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "create_solution_up",
+            "depends_on": [
+                {
+                    "task_key": "create_event_tracker"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/5_create_solution",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "solution": "up"
+                }
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "create_solution_version_popular",
+            "depends_on": [
+                {
+                    "task_key": "create_solution_popular"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/6_create_solution_version",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "solution": "popular"
+                }
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "create_solution_version_sims",
+            "depends_on": [
+                {
+                    "task_key": "create_solution_sims"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/6_create_solution_version",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "solution": "sims"
+                }
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "create_solution_version_up",
+            "depends_on": [
+                {
+                    "task_key": "create_solution_up"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/6_create_solution_version",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "solution": "up"
+                }
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "create_campaign_popular",
+            "depends_on": [
+                {
+                    "task_key": "create_solution_version_popular"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/7_create_campaign",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "solution": "popular"
+                }
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "create_campaign_sims",
+            "depends_on": [
+                {
+                    "task_key": "create_solution_version_sims"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/7_create_campaign",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "solution": "sims"
+                }
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "create_campaign_up",
+            "depends_on": [
+                {
+                    "task_key": "create_solution_version_up"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/7_create_campaign",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "solution": "up"
+                }
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "create_filter_category",
+            "depends_on": [
+                {
+                    "task_key": "create_campaign_up"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/8_create_filter",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "filter": "category"
+                }
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "create_filter_logomaker",
+            "depends_on": [
+                {
+                    "task_key": "create_campaign_up"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/8_create_filter",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "filter": "logomaker"
+                }
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "create_filter_accessory",
+            "depends_on": [
+                {
+                    "task_key": "create_campaign_sims"
+                },
+                {
+                    "task_key": "create_campaign_up"
+                },
+                {
+                    "task_key": "create_campaign_popular"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/8_create_filter",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                    "filter": "accessory"
+                }
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "update_version_campaign_filter_map",
+            "depends_on": [
+                {
+                    "task_key": "create_filter_category"
+                },
+                {
+                    "task_key": "create_filter_logomaker"
+                },
+                {
+                    "task_key": "create_filter_accessory"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/9_update_version_campaign_filter_map",
+                "source": "WORKSPACE"
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "integration_tests",
+            "depends_on": [
+                {
+                    "task_key": "update_version_campaign_filter_map"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/10_integration_tests",
+                "source": "WORKSPACE"
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "update_version_event_tracker_map",
+            "depends_on": [
+                {
+                    "task_key": "integration_tests"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/11_update_version_event_tracker_map",
+                "source": "WORKSPACE"
+            },
+            "job_cluster_key": "small_cluster"
+        },
+        {
+            "task_key": "create_dashboards_and_alarms",
+            "depends_on": [
+                {
+                    "task_key": "update_version_event_tracker_map"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "personalize_models/12_create_dashboards_and_alarms",
+                "source": "WORKSPACE"
+            },
+            "job_cluster_key": "small_cluster"
+        }
+    ],
+    "job_clusters": [
+        {
+            "job_cluster_key": "small_cluster",
+            "new_cluster": {
+                "spark_version": "16.4.x-scala2.13",
+                "spark_conf": {
+                    "spark.master": "local[*]"
+                },
+                "aws_attributes": {
+                    "first_on_demand": 1,
+                    "availability": "ON_DEMAND",
+                    "instance_profile_arn": "PLACEHOLDER",
+                    "spot_bid_price_percent": 50,
+                    "ebs_volume_count": 0
+                },
+                "num_workers": 0,
+                "node_type_id": "m5d.large",
+                "custom_tags": {
+                    "Product": "PLACEHOLDER"
+                },
+                "policy_id": "PLACEHOLDER",
+                "data_security_mode": "SINGLE_USER"
+            }
+        },
+        {
+            "job_cluster_key": "large_cluster",
+            "new_cluster": {
+                "spark_version": "16.4.x-scala2.13",
+                "spark_conf": {
+                    "spark.master": "local[*]",
+                    "spark.driver.memoryOverhead": "55g",
+                    "spark.driver.memory": "55g"
+                },
+                "aws_attributes": {
+                    "first_on_demand": 1,
+                    "availability": "ON_DEMAND",
+                    "instance_profile_arn": "PLACEHOLDER",
+                    "spot_bid_price_percent": 50,
+                    "ebs_volume_count": 0
+                },
+                "num_workers": 0,
+                "node_type_id": "i3.4xlarge",
+                "custom_tags": {
+                    "Product": "PLACEHOLDER"
+                },
+                "policy_id": "PLACEHOLDER",
+                "data_security_mode": "SINGLE_USER"
+            }
+        }
+    ]
+}

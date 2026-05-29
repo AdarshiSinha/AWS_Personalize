@@ -1,0 +1,45 @@
+{
+    "name": "industry_popular_items",
+    "new_cluster": {
+        "spark_version": "16.4.x-scala2.13",
+        "aws_attributes": {
+            "first_on_demand": 1,
+            "availability": "ON_DEMAND",
+            "instance_profile_arn": "PLACEHOLDER",
+            "ebs_volume_count": 0,
+            "spot_bid_price_percent": 50
+        },
+        "spark_conf": {
+            "spark.master": "local[*]",
+            "spark.databricks.cluster.profile": "singleNode"
+        },
+        "num_workers": 0,
+        "node_type_id": "r5d.large",
+        "policy_id": "PLACEHOLDER",
+        "cluster_log_conf": {
+            "s3": {
+                "destination": "PLACEHOLDER",
+                "region": "eu-west-1",
+                "enable_encryption": true,
+                "canned_acl": "bucket-owner-full-control"
+            }
+        },
+        "custom_tags": {
+            "Product": "dna-ppp-product-recommender-data-product"
+        }
+    },
+    "email_notifications": {
+        "on_failure": "PLACEHOLDER",
+        "no_alert_for_skipped_runs": false
+    },
+    "timeout_seconds": 3600,
+    "notebook_task": {
+        "notebook_path": "industry_items/load_industry_popular_items_to_dynamo"
+    },
+    "max_concurrent_runs": 1,
+    "schedule": {
+        "quartz_cron_expression": "0 0 14 ? * * *",
+        "timezone_id": "UTC",
+        "pause_status": "PAUSED"
+    }
+}

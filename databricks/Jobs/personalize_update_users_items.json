@@ -1,0 +1,95 @@
+{
+    "name": "personalize_update_users_items",
+    "email_notifications": {
+        "on_failure": "PLACEHOLDER",
+        "no_alert_for_skipped_runs": false
+    },
+    "timeout_seconds": 7200,
+    "max_concurrent_runs": 1,
+    "tasks": [
+        {
+            "task_key": "item_base",
+            "job_cluster_key": "medium_cluster",
+            "notebook_task": {
+                "notebook_path": "personalize_models/item_base",
+                "source": "WORKSPACE"
+            }
+        },
+        {
+            "task_key": "list_datasets",
+            "depends_on": [
+                {
+                    "task_key": "item_base"
+                }
+            ],
+            "job_cluster_key": "medium_cluster",
+            "run_if": "ALL_SUCCESS",
+            "notebook_task": {
+                "notebook_path": "personalize_models/update_users_items",
+                "source": "WORKSPACE"
+            }
+        },
+        {
+            "task_key": "import_data_loop",
+            "depends_on": [
+                {
+                    "task_key": "list_datasets"
+                }
+            ],
+            "run_if": "ALL_SUCCESS",
+            "for_each_task": {
+                "inputs": "{{tasks.list_datasets.values.dataset_params}}",
+                "concurrency": 20,
+                "task": {
+                    "task_key": "import_data",
+                    "job_cluster_key": "medium_cluster",
+                    "run_if": "ALL_SUCCESS",
+                    "notebook_task": {
+                        "notebook_path": "personalize_models/3_import_data",
+                        "base_parameters": {
+                            "dataset_group_name": "{{input.dataset_group_name}}",
+                            "dataset_type": "{{input.dataset_type}}",
+                            "dataset_arn": "{{input.dataset_arn}}"
+                        },
+                        "source": "WORKSPACE"
+                    }
+                }
+            }
+        }
+    ],
+    "format": "MULTI_TASK",
+    "queue": {
+        "enabled": true
+    },
+    "schedule": {
+        "quartz_cron_expression": "0 0 11 * * ?",
+        "timezone_id": "UTC",
+        "pause_status": "UNPAUSED"
+    },
+    "job_clusters": [
+        {
+            "job_cluster_key": "medium_cluster",
+            "new_cluster": {
+                "spark_version": "16.4.x-scala2.13",
+                "spark_conf": {
+                    "spark.master": "local[*]",
+                    "spark.driver.memoryOverhead": "8g"
+                },
+                "aws_attributes": {
+                    "first_on_demand": 1,
+                    "availability": "ON_DEMAND",
+                    "instance_profile_arn": "PLACEHOLDER",
+                    "spot_bid_price_percent": 50,
+                    "ebs_volume_count": 0
+                },
+                "num_workers": 0,
+                "node_type_id": "m5d.2xlarge",
+                "custom_tags": {
+                    "Product": "PLACEHOLDER"
+                },
+                "policy_id": "PLACEHOLDER",
+                "data_security_mode": "SINGLE_USER"
+            }
+        }
+    ]
+}
