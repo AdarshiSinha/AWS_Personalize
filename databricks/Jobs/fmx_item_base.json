@@ -1,0 +1,188 @@
+{
+    "name": "fmx_item_base",
+    "email_notifications": {
+        "on_failure": "PLACEHOLDER",
+        "no_alert_for_skipped_runs": false
+    },
+    "schedule": {
+        "quartz_cron_expression": "0 0 9 * * ?",
+        "timezone_id": "UTC",
+        "pause_status": "PAUSED"
+    },
+    "timeout_seconds": 86400,
+    "max_concurrent_runs": 1,
+    "format": "MULTI_TASK",
+    "tasks": [
+        {
+            "task_key": "all_products_raw",
+            "notebook_task": {
+                "notebook_path": "fmx_items/1_all_products_raw",
+                "source": "WORKSPACE"
+            },
+            "job_cluster_key": "medium_cluster"
+        },
+        {
+            "task_key": "available_products",
+            "depends_on": [
+                {
+                    "task_key": "all_products_raw"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "fmx_items/2_1_available_products",
+                "source": "WORKSPACE"
+            },
+            "job_cluster_key": "medium_cluster"
+        },
+        {
+            "task_key": "constrained_products",
+            "depends_on": [
+                {
+                    "task_key": "all_products_raw"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "fmx_items/2_2_constrained_products",
+                "source": "WORKSPACE"
+            },
+            "job_cluster_key": "medium_cluster"
+        },
+        {
+            "task_key": "accessory_flags",
+            "depends_on": [
+                {
+                    "task_key": "all_products_raw"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "fmx_items/2_3_accessory_flags",
+                "source": "WORKSPACE"
+            },
+            "job_cluster_key": "medium_cluster"
+        },
+        {
+            "task_key": "logomaker_flags",
+            "depends_on": [
+                {
+                    "task_key": "all_products_raw"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "fmx_items/2_4_logomaker_flags",
+                "source": "WORKSPACE"
+            },
+            "job_cluster_key": "medium_cluster"
+        },
+        {
+            "task_key": "merchandise_dates",
+            "depends_on": [
+                {
+                    "task_key": "all_products_raw"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "fmx_items/2_5_merchandise_dates",
+                "source": "WORKSPACE"
+            },
+            "job_cluster_key": "medium_cluster"
+        },
+        {
+            "task_key": "pricing_data",
+            "depends_on": [
+                {
+                    "task_key": "all_products_raw"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "fmx_items/2_6_pricing_data",
+                "source": "WORKSPACE"
+            },
+            "job_cluster_key": "medium_cluster"
+        },
+        {
+            "task_key": "product_descriptions",
+            "depends_on": [
+                {
+                    "task_key": "all_products_raw"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "fmx_items/2_7_product_descriptions",
+                "source": "WORKSPACE"
+            },
+            "job_cluster_key": "medium_cluster"
+        },
+        {
+            "task_key": "site_category",
+            "depends_on": [
+                {
+                    "task_key": "all_products_raw"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "fmx_items/2_8_site_category",
+                "source": "WORKSPACE"
+            },
+            "job_cluster_key": "medium_cluster"
+        },
+        {
+            "task_key": "all_features",
+            "depends_on": [
+                {
+                    "task_key": "available_products"
+                },
+                {
+                    "task_key": "constrained_products"
+                },
+                {
+                    "task_key": "accessory_flags"
+                },
+                {
+                    "task_key": "logomaker_flags"
+                },
+                {
+                    "task_key": "merchandise_dates"
+                },
+                {
+                    "task_key": "pricing_data"
+                },
+                {
+                    "task_key": "product_descriptions"
+                },
+                {
+                    "task_key": "site_category"
+                }
+            ],
+            "notebook_task": {
+                "notebook_path": "fmx_items/3_all_features",
+                "source": "WORKSPACE"
+            },
+            "job_cluster_key": "medium_cluster"
+        }
+    ],
+    "job_clusters": [
+        {
+            "job_cluster_key": "medium_cluster",
+            "new_cluster": {
+                "spark_version": "16.4.x-scala2.13",
+                "spark_conf": {
+                    "spark.master": "local[*]"
+                },
+                "aws_attributes": {
+                    "first_on_demand": 1,
+                    "availability": "ON_DEMAND",
+                    "instance_profile_arn": "PLACEHOLDER",
+                    "spot_bid_price_percent": 50,
+                    "ebs_volume_count": 0
+                },
+                "num_workers": 0,
+                "node_type_id": "m5d.2xlarge",
+                "custom_tags": {
+                    "Product": "PLACEHOLDER"
+                },
+                "policy_id": "PLACEHOLDER",
+                "data_security_mode": "SINGLE_USER"
+            }
+        }
+    ]
+}
