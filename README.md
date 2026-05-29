@@ -1,2 +1,1 @@
-# AWS_Personalize
-Product recommendations
+# model-training-databrick notebooks
