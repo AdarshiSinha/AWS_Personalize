@@ -1,0 +1,21 @@
+{
+    "project_name": "dna-ppp-product-recommender-data-product",
+    "scopes": [
+        {
+            "personalizationProductRecommender": [
+                "cimpressClientSecret",
+                "cimpressClientId",
+                "snowflakeWarehouseRecommendation",
+                "artifactoryUser",
+                "artifactoryPwd",
+                "awsPersonalizeAccountRole",
+                "awsStorageCommonAccountRole",
+                "dbtPipelineAccessToken",
+                "dbtProjectUrl",
+                "sendgridToken",
+                "akeylessAuthMethodId",
+                "tempTokenUrl"
+            ]
+        }
+    ]
+}
