@@ -1,0 +1,27 @@
+{
+    "databricks_url": "https://dbc-dna-e2-dev.cloud.databricks.com",
+    "databricks_project_root": "/Shared/dna-ppp/product_recommender",
+    "environment": "dev",
+    "instance_profile_arn" : "arn:aws:iam::535692061815:instance-profile/aws-dpp-dna-e2-common-dev",
+    "new_cluster.policy_id": "A65F827F7C000002",
+    "spark.hadoop.fs.s3a.stsAssumeRole.arn": "arn:aws:iam::963265269284:role/aws-dpp-dna-e2-common-dev-databricks",
+    "new_cluster.custom_tags.Service": "DBC-VISTA-COMMON",
+    "new_cluster.custom_tags.Product": "PRODUCT-RECOMENDATION",
+    "new_cluster.custom_tags.Environment": "DEV",
+    "new_cluster.custom_tags.Domain": "COMMON",
+    "new_cluster.custom_tags.Organization": "VISTA",
+    "user_access": [
+        "Robert.McNicol@vista.com:developer",
+        "irina.kireeva@vistaprint.com:developer",
+        "Stanislau.Vinarski@vistaprint.com:developer",
+        "Zachary.Thomas@vistaprint.com:developer",
+        "Dorina.Alimadhi@vistaprint.com:developer",
+        "Anuja.Mitra@vistaprint.com:viewer",
+        "Rodolfo.Castro@vistaprint.com:developer",
+        "jalin@vistaprint.com:developer",
+        "aleix.garciavilchez@vistaprint.com:developer",
+        "ajinkya.sakhare@vistaprint.com:developer",
+        "harshita.jain@vistaprint.com:developer"
+    ],
+    "group_access": ["productrecommendations-a0ce4e86-2360-460e-8100-81a39afe3cf0:developer"]
+}
