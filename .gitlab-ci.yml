@@ -1,0 +1,91 @@
+stages:
+  - test
+  - deploy-secrets
+  - deploy-databricks
+
+default:
+  tags:
+    - ballista-chicken
+
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+
+.get-databricks-token: &get-databricks-token
+  - AKEYLESS_TOKEN=$(curl --silent --url 'https://rest.akeyless.io/auth' --data-urlencode "access-id=p-ggr5d3vp3b2s" --data-urlencode "access-type=jwt" --data-urlencode "jwt=$AKEYLESS_JWT_TOKEN" -X POST | jq -r '.token')
+  - export DATABRICKS_TOKEN=$(curl --silent --url 'https://rest.akeyless.io/get-dynamic-secret-value' --data-urlencode "name=/vistaprint/dna/ppp/team/precs/$ENV/databricks_token" --data-urlencode "token=$AKEYLESS_TOKEN" | jq -r '.response.token_value')
+
+.template-deploy-secrets: &template-deploy-secrets
+  image: registry.gitlab.com/vistaprint-org/dna/pricing-promo-and-personalization/shared/runtimes/databricks-runtime:13.0
+  environment: $ENV
+  stage: deploy-secrets
+  id_tokens:
+    AKEYLESS_JWT_TOKEN:
+      aud: https://akeyless.io
+  script:
+    - *get-databricks-token
+    - cd databricks
+
+    - export personalizationProductRecommender_artifactoryUser=$DNA_ARTIFACTORY_CLIENT
+    - export personalizationProductRecommender_artifactoryPwd=$DNA_ARTIFACTORY_SECRET
+    - export personalizationProductRecommender_awsPersonalizeAccountRole=$RECOS_AWS_ACCOUNT_ROLE
+    - export personalizationProductRecommender_awsStorageCommonAccountRole=$RECOS_AWS_ACCOUNT_ROLE
+    - export personalizationProductRecommender_akeylessAuthMethodId=$AKEYLESS_AUTH_METHOD_ID
+    - export personalizationProductRecommender_cimpressClientId=$CIMPRESS_CLIENT_ID
+    - export personalizationProductRecommender_cimpressClientSecret=$CIMPRESS_CLIENT_SECRET
+    - export personalizationProductRecommender_dbtPipelineAccessToken=$DBT_PIPELINE_ACCESS_TOKEN
+    - export personalizationProductRecommender_tempTokenUrl=$TEMP_TOKEN_URL
+    - export personalizationProductRecommender_dbtProjectUrl=$DBT_PROJECT_URL
+    - export personalizationProductRecommender_sendgridToken=$SENDGRID_TOKEN
+    - export personalizationProductRecommender_snowflakeWarehouseRecommendation=$SNOWFLAKE_WAREHOUSE_RECOMMENDATION
+
+    - brickwork deploy-secrets --token $DATABRICKS_TOKEN config/${ENV}.json
+  when: manual
+
+deploy-secrets-dev:
+  <<: *template-deploy-secrets
+  resource_group: dev
+  variables:
+    ENV: dev
+
+deploy-secrets-stg:
+  <<: *template-deploy-secrets
+  resource_group: stg
+  variables:
+    ENV: stg
+
+deploy-secrets-prd:
+  <<: *template-deploy-secrets
+  resource_group: prd
+  variables:
+    ENV: prd
+
+.template-deploy-databricks: &template-deploy-databricks
+  image: registry.gitlab.com/vistaprint-org/dna/pricing-promo-and-personalization/shared/runtimes/databricks-runtime:13.0
+  environment: $ENV
+  stage: deploy-databricks
+  id_tokens:
+    AKEYLESS_JWT_TOKEN:
+      aud: https://akeyless.io
+  script:
+    - *get-databricks-token
+    - cd databricks
+    - brickwork deploy --prune-jobs --token $DATABRICKS_TOKEN config/${ENV}.json
+
+deploy-databricks-stg:
+  <<: *template-deploy-databricks
+  resource_group: stg
+  variables:
+    ENV: stg
+  except:
+    refs:
+      - main
+
+deploy-databricks-prd:
+  <<: *template-deploy-databricks
+  resource_group: prd
+  variables:
+   ENV: prd
+  only:
+    refs:
+      - main
